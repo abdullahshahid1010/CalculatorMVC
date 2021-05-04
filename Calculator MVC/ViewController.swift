@@ -10,13 +10,14 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    var formatter = NumberFormatter()
     
     var runningNumber = ""
     var leftValue = ""
     var rightValue = ""
     var result = ""
     var currentOperation : Operation = .noOperation
+    let formatter = NumberFormatter()
+    var isRunningNumbernegative = false
     
     @IBOutlet weak var outputLbl: UILabel!
     @IBOutlet var buttons: [UIButton]!
@@ -45,31 +46,14 @@ class ViewController: UIViewController {
     @IBAction func dotPressed(_ sender: UIButton) {
         dotpressed()
     }
-    var isRunningNumbernegative = false
+    
     @IBAction func plusMinusPressed(_ sender: UIButton) {
-        
-        if isRunningNumbernegative && runningNumber.count != 0{
-            runningNumber.removeFirst()
-            isRunningNumbernegative = false
-        }
-       else{
-        if runningNumber.count == 0{
-            runningNumber = "-"
-            isRunningNumbernegative = true
-        }
-        else{
-            runningNumber = "-" + runningNumber
-            isRunningNumbernegative = true
-        }
-    }
-        
-        showRunningNumber()
-        
+        togglePlusMinus()
     }
     
    
     @IBAction func percentagePressed(_ sender: UIButton) {
-        //operation(operation: .Percentage)
+        percentage()
     }
     
     @IBAction func equalPressed(_ sender: UIButton) {
@@ -103,11 +87,18 @@ extension ViewController{
     }
     
     func showtResult(){
-
-        if Double(result)?.truncatingRemainder(dividingBy: 1) == 0{
+        if result.count>=9{
+            formatter.numberStyle = .scientific
+            formatter.positiveFormat = "0.###E0"
+            formatter.exponentSymbol = "e"
+            result = formatter.string(from: Double(result)! as NSNumber)!
+            
+        }
+        else if Double(result)?.truncatingRemainder(dividingBy: 1) == 0{
             result = "\(Int(Double(result)!))"
         }
-        outputLbl.text = String(result.prefix(9))
+        //outputLbl.text = String(result.prefix(9))
+        outputLbl.text = result
     }
     
     func allClear(){
@@ -138,7 +129,6 @@ extension ViewController{
                 
                 showtResult()
                 leftValue = result
-                
             }
             currentOperation = operation
         }
@@ -151,6 +141,7 @@ extension ViewController{
     
     
     func calculations(){
+        
         if currentOperation == .Add{
             result = "\(Double(leftValue)! + Double(rightValue)!)"
         }
@@ -163,11 +154,9 @@ extension ViewController{
         else if currentOperation == .Divide{
             result = "\(Double(leftValue)! / Double(rightValue)!)"
         }
-//        else if currentOperation == .Percentage{
-//            result = "\(Double(rightValue)!/100)"
-//            //showtResult()
-//        }
+    
     }
+    
     func dotpressed(){
         if runningNumber.count == 0{
             runningNumber += "0."
@@ -180,10 +169,37 @@ extension ViewController{
             showRunningNumber()
         }
     }
+    
+    func togglePlusMinus(){
+            
+            if isRunningNumbernegative && runningNumber.count != 0{
+                runningNumber.removeFirst()
+                isRunningNumbernegative = false
+            }
+           else{
+            if runningNumber.count == 0{
+                runningNumber = "-"
+                isRunningNumbernegative = true
+            }
+            else{
+                runningNumber = "-" + runningNumber
+                isRunningNumbernegative = true
+            }
+        }
+            showRunningNumber()
+    }
+    
+    func percentage(){
+        if runningNumber != ""{
+            runningNumber = "\(Double(runningNumber)!/100)"
+            result = runningNumber
+        showtResult()
+        }
+        else if result != "" {
+            result = "\(Double(result)!/100)"
+            showtResult()
+        }
+    }
 }
 
 
-
-extension ViewController{
-
-}
